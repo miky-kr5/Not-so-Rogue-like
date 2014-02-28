@@ -1,0 +1,19 @@
+# Object files
+*.o
+*.ko
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+obj/
+
+# Executables
+*.exe
+*.out
+*.app
+bin/
+
+# Emacs backups
+*~
