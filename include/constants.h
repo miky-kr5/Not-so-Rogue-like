@@ -1,22 +1,35 @@
-#pragma once
+/**
+ * Copyright (c) 2014, Miguel Angel Astor Romero. All rights reserved.
+ * See the file LICENSE for more details.
+ */
+
 #ifndef STATE_CONSTS_H
 #define STATE_CONSTS_H
 
-static const int BAR_COLOR = 1;
-static const int BSC_COLOR = 2;
-static const int HLT_COLOR = 3;
-static const int OFF_COLOR = 4;
-static const int DIM_COLOR = 5;
-static const int LIT_COLOR = 6;
-static const int GUI_COLOR = 7;
-static const int EMP_COLOR = 8;
+#if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
+#define F_SEP "\\"
+#elif defined(__linux__) || defined(__GNUC__)
+#define F_SEP "/"
+#else
+#error "Unrecognized system."
+#endif
 
-static const int INTRO_STATE = 0;
-static const int MENU_STATE = 1;
-static const int LOAD_STATE = 2;
-static const int SCORE_STATE = 3;
-static const int GAME_STATE = 4;
-
-static const int QUIT_STATE = -1;
+enum COLORS {
+    BAR_COLOR = 1,
+    BSC_COLOR,
+    HLT_COLOR,
+    OFF_COLOR,
+    DIM_COLOR,
+    LIT_COLOR,
+    GUI_COLOR,
+    EMP_COLOR,
+    DW_COLOR,
+    SW_COLOR,
+    SN_COLOR,
+    GR_COLOR,
+    FR_COLOR,
+    HL_COLOR,
+    MN_COLOR
+};
 
 #endif
