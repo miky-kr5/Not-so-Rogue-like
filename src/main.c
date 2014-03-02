@@ -27,7 +27,7 @@ void set_colors(void);
 void clear_screen(void);
 void on_resize(int);
 
-static int w = 0, h = 0;
+static int w = 0, h = 0, resize = 0;
 
 int main() {
 	int finished = 0;
@@ -66,7 +66,6 @@ int main() {
 		strcpy(log_file, data_dir);
 		strcat(log_file, F_SEP "stderr");
 		f = freopen(log_file, "a", stderr);
-        fclose(f);
 
 		/* Log the current date and time. */
 		time(&raw_date);
@@ -109,6 +108,18 @@ int main() {
 	do{
         clear_screen();
 
+        if(resize){
+            endwin();
+            refresh();
+
+            getmaxyx(stdscr, h, w);
+
+            fprintf(stderr, "\tSIGWINCH caught. (W: %d, H: %d)\n", w, h);
+
+            resize = 0;
+            signal(SIGWINCH, on_resize);
+        }
+
         states[c_state].input();
         c_state = states[c_state].update();
 
@@ -132,6 +143,8 @@ int main() {
 
         refresh();
     }while(!finished);
+
+    fclose(f);
 
 	return EXIT_SUCCESS;
 }
@@ -171,18 +184,18 @@ void manage_signal(int signal){
 }
 
 void on_resize(int signal){
-	struct winsize ws;
+	/*struct winsize ws;*/
 
 	/* Request the new size of the terminal. */
-	ioctl(1, TIOCGWINSZ, &ws);
+	/*ioctl(1, TIOCGWINSZ, &ws);*/
 
 	/* Resize ncurses's stdscr. */
-	resizeterm(ws.ws_row, ws.ws_col);
+	/*resizeterm(ws.ws_row, ws.ws_col);*/
 
 	/* Get the new size of the window. */
-	getmaxyx(stdscr, h, w);
+	/*getmaxyx(stdscr, h, w);*/
 
-	fprintf(stderr, "\tSIGWINCH caught. (W: %d, H: %d)\n", w, h);
+    resize = 1;
 }
 
 int start_ncurses(void){
