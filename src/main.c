@@ -30,7 +30,7 @@ void on_resize(int);
 static int w = 0, h = 0;
 
 int main() {
-	bool finished = false;
+	int finished = 0;
 #if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
     char      *    home_dir = getenv("APPDATA");
 #elif defined(__linux__) || defined(__GNUC__)
@@ -38,6 +38,9 @@ int main() {
 #else
 #error "Unrecoginized compiler."
 #endif
+    FILE      *    f; /* To avoid a warning. */
+    clock_t        then, now, delta;
+    unsigned int   fps = 0, pfps = 0;
 	char      *    data_dir;
 	char      *    log_file;
 	time_t         raw_date;
@@ -62,7 +65,8 @@ int main() {
 		log_file = (char*)malloc(strlen(data_dir) + 8);
 		strcpy(log_file, data_dir);
 		strcat(log_file, F_SEP "stderr");
-		freopen(log_file, "a", stderr);
+		f = freopen(log_file, "a", stderr);
+        fclose(f);
 
 		/* Log the current date and time. */
 		time(&raw_date);
@@ -95,17 +99,36 @@ int main() {
 	}
 	set_colors();
 
+    /* Create the state data structures. */
     c_state = 2;
-    
     states = (gs_t *)malloc(sizeof(gs_t) * NUM_STATES);
     initStateArray(&states);
 
+    /* Start the game loop. */
+    then = clock();
 	do{
         clear_screen();
 
         states[c_state].input();
         c_state = states[c_state].update();
+
+        if(c_state == -1) finished = 1;
+
         states[c_state].render(w, h);
+
+        fps++;
+
+        now = clock();
+        delta = now - then;
+        if((int)delta / (int)CLOCKS_PER_SEC == 1){
+            then = now;
+            pfps = fps;
+            fps = 0;
+        }
+
+        move(0, 0);
+        attron(COLOR_PAIR(BAR_COLOR));
+        printw("FPS: %u", pfps);
 
         refresh();
     }while(!finished);
@@ -215,8 +238,8 @@ void set_colors(void){
 			init_pair(GUI_COLOR, COLOR_YELLOW, COLOR_YELLOW); /* Main GUI bar color. */
 			init_pair(EMP_COLOR, COLOR_WHITE, COLOR_WHITE);   /* Empty GUI bar color. */
 
-            init_pair(DW_COLOR, COLOR_MAGENTA, COLOR_BLACK);
-            init_pair(SW_COLOR, COLOR_BLUE, COLOR_BLACK);
+            init_pair(DW_COLOR, COLOR_BLUE, COLOR_BLACK);
+            init_pair(SW_COLOR, COLOR_CYAN, COLOR_BLACK);
             init_pair(SN_COLOR, COLOR_YELLOW, COLOR_BLACK);
             init_pair(GR_COLOR, COLOR_GREEN, COLOR_BLACK);
             init_pair(FR_COLOR, COLOR_GREEN, COLOR_BLACK);
