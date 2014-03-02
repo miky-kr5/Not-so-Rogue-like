@@ -41,11 +41,20 @@ void initInGameState( gs_t * gs) {
     smooth( &imap, n );
     normInt ( &imap, n );
 
+    for ( i = 0; i < n; ++i ) {
+        free(map[ i ]);
+    }
     free(map);
 }
 
 void input(){
+    int key = 0;
 
+    key = getch();
+
+    if(key != ERR){
+        fprintf(stderr, "\t%s: Caught keycode %d\n", __FILE__, key);
+    }
 }
 
 gsname_t update(){
@@ -62,11 +71,11 @@ void render(int w, int h){
             switch(terrainType( imap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE] )){
                 case DEEP_WATER:
                     attron(COLOR_PAIR(DW_COLOR));
-                    printw("~");
+                    printw("\u2248");
                     break;
                 case SHALLOW_WATER:
                     attron(COLOR_PAIR(SW_COLOR));
-                    printw("~");
+                    printw("\u2248");
                     break;
                 case SAND:
                     attron(COLOR_PAIR(SN_COLOR));
@@ -74,7 +83,7 @@ void render(int w, int h){
                     break;
                 case GRASS:
                     attron(COLOR_PAIR(GR_COLOR));
-                    printw("\u2591");
+                    printw("n");
                     break;
                 case FOREST:
                     attron(COLOR_PAIR(FR_COLOR));
@@ -89,6 +98,7 @@ void render(int w, int h){
                     printw("\u25B2");
                     break;
             }
+            //printw("\u2588");
 		}
 	}
 }

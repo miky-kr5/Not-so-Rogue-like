@@ -27,10 +27,11 @@ void set_colors(void);
 void clear_screen(void);
 void on_resize(int);
 
-static int w = 0, h = 0, resize = 0;
+static int w = 0, h = 0;
+static bool resize = FALSE;
 
 int main() {
-	int finished = 0;
+	bool finished = FALSE;
 #if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
     char      *    home_dir = getenv("APPDATA");
 #elif defined(__linux__) || defined(__GNUC__)
@@ -106,8 +107,6 @@ int main() {
     /* Start the game loop. */
     then = clock();
 	do{
-        clear_screen();
-
         /* Handle terminal resize. */
         if(resize){
             endwin();
@@ -117,14 +116,14 @@ int main() {
 
             fprintf(stderr, "\tSIGWINCH caught. (W: %d, H: %d)\n", w, h);
 
-            resize = 0;
+            resize = FALSE;
             signal(SIGWINCH, on_resize);
         }
 
         states[c_state].input();
         c_state = states[c_state].update();
 
-        if(c_state == -1) finished = 1;
+        if(c_state == -1) finished = TRUE;
 
         states[c_state].render(w, h);
 
@@ -180,12 +179,11 @@ void manage_signal(int signal){
         fprintf(stderr, "\tSIGTERM caught.\n");
 		exit(EXIT_FAILURE);
 		break;
-
 	}
 }
 
 void on_resize(int signal){
-    resize = 1;
+    resize = TRUE;
 }
 
 int start_ncurses(void){
@@ -219,6 +217,11 @@ int start_ncurses(void){
 	if(ret_code == ERR)
 		return -1;
 
+    /* Set delay. */
+    ret_code = nodelay(stdscr, TRUE);
+    if(ret_code == ERR)
+		return -1;
+
 	/* Initialize the screen size variables. */
 	getmaxyx(stdscr, h, w);
 
@@ -246,7 +249,7 @@ void set_colors(void){
             init_pair(SN_COLOR, COLOR_YELLOW, COLOR_BLACK);
             init_pair(GR_COLOR, COLOR_GREEN, COLOR_BLACK);
             init_pair(FR_COLOR, COLOR_GREEN, COLOR_BLACK);
-            init_pair(HL_COLOR, COLOR_RED, COLOR_BLACK);
+            init_pair(HL_COLOR, COLOR_WHITE, COLOR_BLACK);
             init_pair(MN_COLOR, COLOR_WHITE, COLOR_BLACK);
 		}
 	}else{
