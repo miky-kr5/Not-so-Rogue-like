@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2014, Miguel Angel Astor Romero. All rights reserved.
+ * See the file LICENSE for more details.
+ */
+
 #include "game_state.h"
 #include "in_game.h"
 

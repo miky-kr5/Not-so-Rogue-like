@@ -26,4 +26,3 @@ obj/in_game.o: src/in_game.c include/in_game.h include/game_state.h
 
 clean:
 	$(RM) $(TARGET) $(OBJECTS)
-

@@ -6,16 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
 #include <errno.h>
 #include <signal.h>
 #include <ncursesw/ncurses.h>
-#include <termios.h>
 #include <locale.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 
 #include "constants.h"
 #include "game_state.h"
@@ -37,7 +33,7 @@ int main() {
 #elif defined(__linux__) || defined(__GNUC__)
 	char      *    home_dir = getenv("HOME");
 #else
-#error "Unrecoginized compiler."
+#error "Unrecognized system."
 #endif
     FILE      *    f; /* To avoid a warning. */
     clock_t        then, now, delta;
@@ -83,7 +79,6 @@ int main() {
 				fprintf(stderr, "\tdata_dir is: %s\n", data_dir);
 			}else{
 				/* The directory already exits. */
-				//init_scores(data_dir);
 			}
 		}
 	}else{

@@ -1,4 +1,10 @@
+/**
+ * Copyright (c) 2014, Miguel Angel Astor Romero. All rights reserved.
+ * See the file LICENSE for more details.
+ */
+
 #include <stdlib.h>
+#include <time.h>
 #include <ncursesw/ncurses.h>
 #include <island.h>
 
@@ -7,13 +13,16 @@
 
 static const int I_SIZE = 257;
 static int ** imap;
+static bool ** wmap;
+static bool w_mov = FALSE;
+static clock_t then;
 
 void input();
 gsname_t update();
 void render(int, int);
 
 void initInGameState( gs_t * gs) {
-    int             n, i;
+    int             n, i, j;
     float **        map;
 
     gs->name = IN_GAME;
@@ -23,6 +32,8 @@ void initInGameState( gs_t * gs) {
 
     n = I_SIZE;
 
+    srand(time(NULL));
+
     map = ( float ** ) malloc ( sizeof ( float * ) * n);
     for ( i = 0; i < n; ++i ) {
         map[ i ] = ( float * ) calloc ( n, sizeof ( float ) );
@@ -31,6 +42,14 @@ void initInGameState( gs_t * gs) {
     imap = ( int ** ) malloc ( sizeof ( int * ) * n);
     for ( i = 0; i < n; ++i ) {
         imap[ i ] = ( int * ) calloc ( n, sizeof ( int ) );
+    }
+
+    wmap = ( bool ** ) malloc ( sizeof ( bool * ) * n);
+    for ( i = 0; i < n; ++i ) {
+        wmap[ i ] = ( bool * ) calloc ( n, sizeof ( bool ) );
+        for(j = 0; j < n; ++j){
+            wmap[i][j] = rand() % 2;
+        }
     }
 
     ds ( &map, n );
@@ -62,7 +81,15 @@ gsname_t update(){
 }
 
 void render(int w, int h){
+    clock_t now, delta;
     int i, j;
+
+    now = clock();
+    delta = now - then;
+    if((float)delta / (float)CLOCKS_PER_SEC >= 0.25f){
+        then = now;
+        w_mov = TRUE;
+    }
 
 	for(i = 0; i < w; i++){
 		for(j = 0; j < h; j++){
@@ -71,11 +98,21 @@ void render(int w, int h){
             switch(terrainType( imap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE] )){
                 case DEEP_WATER:
                     attron(COLOR_PAIR(DW_COLOR));
-                    printw("\u2248");
+                    if(w_mov)
+                        wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE] = !wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE];
+                    if(wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE])
+                        printw("\u2248");
+                    else
+                        printw("~");
                     break;
                 case SHALLOW_WATER:
                     attron(COLOR_PAIR(SW_COLOR));
-                    printw("\u2248");
+                    if(w_mov)
+                        wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE] = !wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE];
+                    if(wmap[(i + (I_SIZE/4)) % I_SIZE][(j + (I_SIZE/4)) % I_SIZE])
+                        printw("\u2248");
+                    else
+                        printw("~");
                     break;
                 case SAND:
                     attron(COLOR_PAIR(SN_COLOR));
@@ -101,4 +138,5 @@ void render(int w, int h){
             //printw("\u2588");
 		}
 	}
+    w_mov = FALSE;
 }
