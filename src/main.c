@@ -108,6 +108,7 @@ int main() {
 	do{
         clear_screen();
 
+        /* Handle terminal resize. */
         if(resize){
             endwin();
             refresh();
@@ -184,17 +185,6 @@ void manage_signal(int signal){
 }
 
 void on_resize(int signal){
-	/*struct winsize ws;*/
-
-	/* Request the new size of the terminal. */
-	/*ioctl(1, TIOCGWINSZ, &ws);*/
-
-	/* Resize ncurses's stdscr. */
-	/*resizeterm(ws.ws_row, ws.ws_col);*/
-
-	/* Get the new size of the window. */
-	/*getmaxyx(stdscr, h, w);*/
-
     resize = 1;
 }
 
