@@ -29,21 +29,21 @@ static bool resize = FALSE;
 int main() {
 	bool finished = FALSE;
 #if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
-    char      *    home_dir = getenv("APPDATA");
+	char	  *	home_dir = getenv("APPDATA");
 #elif defined(__linux__) || defined(__GNUC__)
-	char      *    home_dir = getenv("HOME");
+	char	  *	home_dir = getenv("HOME");
 #else
 #error "Unrecognized system."
 #endif
-    FILE      *    f; /* To avoid a warning. */
-    clock_t        then, now, delta;
-    unsigned int   fps = 0, pfps = 0;
-	char      *    data_dir;
-	char      *    log_file;
-	time_t         raw_date;
-	struct tm *    current_date;
-    gs_t      *    states;
-    int            c_state;
+	FILE	  *	f; /* To avoid a warning. */
+	clock_t		then, now, delta;
+	unsigned int   fps = 0, pfps = 0;
+	char	  *	data_dir;
+	char	  *	log_file;
+	time_t		 raw_date;
+	struct tm *	current_date;
+	gs_t	  *	states;
+	int			c_state;
 
 	atexit(leave);
 	signal(SIGINT, manage_signal);
@@ -94,52 +94,52 @@ int main() {
 	}
 	set_colors();
 
-    /* Create the state data structures. */
-    c_state = 2;
-    states = (gs_t *)malloc(sizeof(gs_t) * NUM_STATES);
-    initStateArray(&states);
+	/* Create the state data structures. */
+	c_state = 2;
+	states = (gs_t *)malloc(sizeof(gs_t) * NUM_STATES);
+	initStateArray(&states);
 
-    /* Start the game loop. */
-    then = clock();
+	/* Start the game loop. */
+	then = clock();
 	do{
-        /* Handle terminal resize. */
-        if(resize){
-            endwin();
-            refresh();
+		/* Handle terminal resize. */
+		if(resize){
+			endwin();
+			refresh();
 
-            getmaxyx(stdscr, h, w);
+			getmaxyx(stdscr, h, w);
 
-            fprintf(stderr, "\tSIGWINCH caught. (W: %d, H: %d)\n", w, h);
+			fprintf(stderr, "\tSIGWINCH caught. (W: %d, H: %d)\n", w, h);
 
-            resize = FALSE;
-            signal(SIGWINCH, on_resize);
-        }
+			resize = FALSE;
+			signal(SIGWINCH, on_resize);
+		}
 
-        states[c_state].input();
-        c_state = states[c_state].update();
+		states[c_state].input();
+		c_state = states[c_state].update();
 
-        if(c_state == -1) finished = TRUE;
+		if(c_state == -1) finished = TRUE;
 
-        states[c_state].render(w, h);
+		states[c_state].render(w, h);
 
-        fps++;
+		fps++;
 
-        now = clock();
-        delta = now - then;
-        if((int)delta / (int)CLOCKS_PER_SEC == 1){
-            then = now;
-            pfps = fps;
-            fps = 0;
-        }
+		now = clock();
+		delta = now - then;
+		if((int)delta / (int)CLOCKS_PER_SEC == 1){
+			then = now;
+			pfps = fps;
+			fps = 0;
+		}
 
-        move(0, 0);
-        attron(COLOR_PAIR(BAR_COLOR));
-        printw("FPS: %u", pfps);
+		move(1, 1);
+		attron(COLOR_PAIR(BSC_COLOR));
+		printw("FPS: %u", pfps);
 
-        refresh();
-    }while(!finished);
+		refresh();
+	}while(!finished);
 
-    fclose(f);
+	fclose(f);
 
 	return EXIT_SUCCESS;
 }
@@ -151,7 +151,7 @@ void leave(void){
 	/* Finish ncurses. */
 	endwin();
 
-    /* Mark the end of this run's log. */
+	/* Mark the end of this run's log. */
 	for(i = 0; i < 80; i++)
 		fprintf(stderr, "-");
 	fprintf(stderr, "\n");
@@ -162,30 +162,30 @@ void manage_signal(int signal){
 	switch(signal){
 	case SIGINT:
 		fprintf(stderr, "\tSIGINT caught.\n");
-        exit(EXIT_SUCCESS);
+		exit(EXIT_SUCCESS);
 		break;
 
 	case SIGSEGV:
 		fprintf(stderr, "\tSegmentation fault.\n");
-        exit(EXIT_FAILURE);
-        break;
+		exit(EXIT_FAILURE);
+		break;
 
 	case SIGTERM:
-        fprintf(stderr, "\tSIGTERM caught.\n");
+		fprintf(stderr, "\tSIGTERM caught.\n");
 		exit(EXIT_FAILURE);
 		break;
 	}
 }
 
 void on_resize(int signal){
-    resize = TRUE;
+	resize = TRUE;
 }
 
 int start_ncurses(void){
 	WINDOW *win_ptr;
 	int ret_code;
 
-    setlocale(LC_ALL, "");
+	setlocale(LC_ALL, "");
 
 	/* Prepare the terminal. */
 	win_ptr = initscr();
@@ -212,9 +212,9 @@ int start_ncurses(void){
 	if(ret_code == ERR)
 		return -1;
 
-    /* Set delay. */
-    ret_code = nodelay(stdscr, TRUE);
-    if(ret_code == ERR)
+	/* Set delay. */
+	ret_code = nodelay(stdscr, TRUE);
+	if(ret_code == ERR)
 		return -1;
 
 	/* Initialize the screen size variables. */
@@ -228,29 +228,29 @@ void set_colors(void){
 	ret_code = start_color();
 	if(ret_code == OK){
 		if(has_colors() == TRUE){
-            init_color(COLOR_MAGENTA, 0, 0, 500);
+			init_color(COLOR_MAGENTA, 0, 0, 500);
 
-			init_pair(BAR_COLOR, COLOR_WHITE, COLOR_RED);     /* The color for the top and bottom bars. */
+			init_pair(BAR_COLOR, COLOR_WHITE, COLOR_RED);	 /* The color for the top and bottom bars. */
 			init_pair(BSC_COLOR, COLOR_WHITE, COLOR_BLACK);   /* Basic text color. */
 			init_pair(HLT_COLOR, COLOR_YELLOW, COLOR_BLACK);  /* Highlighted text color. */
-			init_pair(OFF_COLOR, COLOR_BLUE, COLOR_BLACK);    /* Lights off color. */
-			init_pair(DIM_COLOR, COLOR_RED, COLOR_BLACK);     /* Dim light color. */
+			init_pair(OFF_COLOR, COLOR_BLUE, COLOR_BLACK);	/* Lights off color. */
+			init_pair(DIM_COLOR, COLOR_RED, COLOR_BLACK);	 /* Dim light color. */
 			init_pair(LIT_COLOR, COLOR_YELLOW, COLOR_BLACK);  /* Lights on color. */
 			init_pair(GUI_COLOR, COLOR_YELLOW, COLOR_YELLOW); /* Main GUI bar color. */
 			init_pair(EMP_COLOR, COLOR_WHITE, COLOR_WHITE);   /* Empty GUI bar color. */
 
-            init_pair(DW_COLOR, COLOR_BLUE, COLOR_BLACK);
-            init_pair(SW_COLOR, COLOR_CYAN, COLOR_BLACK);
-            init_pair(SN_COLOR, COLOR_YELLOW, COLOR_BLACK);
-            init_pair(GR_COLOR, COLOR_GREEN, COLOR_BLACK);
-            init_pair(FR_COLOR, COLOR_GREEN, COLOR_BLACK);
-            init_pair(HL_COLOR, COLOR_WHITE, COLOR_BLACK);
-            init_pair(MN_COLOR, COLOR_WHITE, COLOR_BLACK);
+			init_pair(DW_COLOR, COLOR_BLUE, COLOR_BLACK);
+			init_pair(SW_COLOR, COLOR_CYAN, COLOR_BLACK);
+			init_pair(SN_COLOR, COLOR_YELLOW, COLOR_BLACK);
+			init_pair(GR_COLOR, COLOR_GREEN, COLOR_BLACK);
+			init_pair(FR_COLOR, COLOR_GREEN, COLOR_BLACK);
+			init_pair(HL_COLOR, COLOR_WHITE, COLOR_BLACK);
+			init_pair(MN_COLOR, COLOR_WHITE, COLOR_BLACK);
 		}
 	}else{
-        fprintf(stderr, "\t%s: Colors not supported.\n", __FILE__);
-        exit(EXIT_FAILURE);
-    }
+		fprintf(stderr, "\t%s: Colors not supported.\n", __FILE__);
+		exit(EXIT_FAILURE);
+	}
 }
 
 void clear_screen(void){
