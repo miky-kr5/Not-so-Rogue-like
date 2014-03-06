@@ -10,6 +10,7 @@
 
 #include "constants.h"
 #include "in_game.h"
+#include "map.h"
 
 typedef struct PLAYER {
 	unsigned short x;
@@ -23,6 +24,8 @@ static bool w_mov = FALSE;
 static bool uK, dK, lK, rK; 
 static clock_t then;
 static player_t player;
+static map_cell_t ** map;
+static int mW, mH;
 
 void input();
 gsname_t update();
@@ -32,7 +35,7 @@ void setPlayerStart();
 
 void initInGameState( gs_t * gs) {
 	int			 n, i, j;
-	float **		map;
+	float **		fmap;
 
 	gs->name = IN_GAME;
 	gs->input = &input;
@@ -43,9 +46,9 @@ void initInGameState( gs_t * gs) {
 
 	srand(time(NULL));
 
-	map = ( float ** ) malloc ( sizeof ( float * ) * n);
+	fmap = ( float ** ) malloc ( sizeof ( float * ) * n);
 	for ( i = 0; i < n; ++i ) {
-		map[ i ] = ( float * ) calloc ( n, sizeof ( float ) );
+		fmap[ i ] = ( float * ) calloc ( n, sizeof ( float ) );
 	}
 
 	imap = ( int ** ) malloc ( sizeof ( int * ) * n);
@@ -61,21 +64,36 @@ void initInGameState( gs_t * gs) {
 		}
 	}
 
-	ds ( &map, n );
+	ds ( &fmap, n );
 	island ( &imap, n );
 	normInt ( &imap, n );
-	norm ( &map, n );
-	mult ( &map, &imap, n );
+	norm ( &fmap, n );
+	mult ( &fmap, &imap, n );
 	smooth( &imap, n );
 	normInt ( &imap, n );
 
 	for ( i = 0; i < n; ++i ) {
-		free(map[ i ]);
+		free(fmap[ i ]);
 	}
-	free(map);
+	free(fmap);
 
 	setPlayerStart();
 	uK = dK = lK = rK = FALSE;
+
+    /*map = ( map_cell_t ** ) malloc ( sizeof ( map_cell_t * ) * 32);
+	for ( i = 0; i < 32; ++i ) {
+		map[ i ] = ( map_cell_t * ) calloc ( 32 , sizeof ( map_cell_t ) );
+	}
+
+    errcode_t rc = readMapData("map_file.map", &map, &mW, &mH);
+
+    fprintf(stderr, "\t%s: readMapData() returned %d\n", __FILE__, rc);
+    fprintf(stderr, "\t%s: Map size is (%d, %d).\n", __FILE__, mW, mH);
+
+    for ( i = 0; i < 32; ++i ) {
+		free(map[ i ]);
+	}
+	free(map);*/
 }
 
 void input(){

@@ -13,10 +13,10 @@ Usage:
     
     *) Left click to place an object on the game_map.
        Objects have to be edited by hand once the game_map has been saved. Use
-       the keys 'd', 'k', 'p', 'n', 'e' and 'q' to set the active object type.
-       The active object type is displayed on the title bar.
+       the keys 'd', 'k', 'p', 'n' and 'e' to set the active object type. The
+       active object type is displayed on the title bar.
     
-    *) Press 'p' to set the player's starting position.
+    *) Press 'q' to set the player's starting position.
 
     *) Press 's' to save the map to the text file 'map_file.map'. This will
        replace any previous map with the same name!
