@@ -25,13 +25,15 @@ static bool uK, dK, lK, rK;
 static clock_t then;
 static player_t player;
 static map_cell_t ** map;
-static int mW, mH;
+game_obj_t objs[MAX_OBJECTS];
+static int mW, mH, nO;
 
 void input();
 gsname_t update();
 void render(int, int);
 void drawGui(int, int);
 void setPlayerStart();
+void initObjects();
 
 void initInGameState( gs_t * gs) {
 	int			 n, i, j;
@@ -85,10 +87,29 @@ void initInGameState( gs_t * gs) {
 		map[ i ] = ( map_cell_t * ) calloc ( 32 , sizeof ( map_cell_t ) );
 	}
 
+    initObjects();
+
     errcode_t rc = readMapData("map_file.map", &map, &mW, &mH);
 
     fprintf(stderr, "\t%s: readMapData() returned %d\n", __FILE__, rc);
     fprintf(stderr, "\t%s: Map size is (%d, %d).\n", __FILE__, mW, mH);
+
+    game_obj_t * objsP = objs;
+    rc = readMapObjects("map_file.map", &objsP, &nO);
+    fprintf(stderr, "\t%s: readMapObjects() returned %d\n", __FILE__, rc);
+    fprintf(stderr, "\t%s: Number of objects is %d.\n", __FILE__, nO);
+
+    for(i = 0; i < nO; i++){
+        fprintf(stderr, "\t%s: Object %d\n", __FILE__, i);
+        fprintf(stderr, "\t\t Type %d\n", (int)objs[i].type);
+        fprintf(stderr, "\t\t x: %d -- y: %d -- eX: %d -- eY: %d -- sX: %d -- sY: %d\n", objs[i].x, objs[i].x, objs[i].eX, objs[i].eY, objs[i].sX, objs[i].sY);
+        fprintf(stderr, "\t\t iD: %d -- dId %d\n", objs[i].id, objs[i].dId);
+        fprintf(stderr, "\t\t name: %s\n", objs[i].name);
+        fprintf(stderr, "\t\t target: %s\n", objs[i].target);
+        fprintf(stderr, "\t\t dialog: %s\n", objs[i].dialog);
+        fprintf(stderr, "\t\t unlocked: %d\n", objs[i].unlocked);
+        fprintf(stderr, "\n");
+    }
 
     for ( i = 0; i < 32; ++i ) {
 		free(map[ i ]);
@@ -275,4 +296,24 @@ void setPlayerStart(){
 			posFound = true;
 		}
 	}
+}
+
+void initObjects(){
+    int i;
+
+    for(i = 0; i < MAX_OBJECTS; ++i){
+        objs[i].type = NONE;
+        objs[i].x = 0;
+        objs[i].y = 0;
+        objs[i].eX = 0;
+        objs[i].eY = 0;
+        objs[i].sX = 0;
+        objs[i].sY = 0;
+        objs[i].id = 0;
+        objs[i].dId = 0;
+        objs[i].name[0] = '\0';
+        objs[i].target[0] = '\0';
+        objs[i].dialog[0] = '\0';
+        objs[i].unlocked = 0;
+    }
 }
