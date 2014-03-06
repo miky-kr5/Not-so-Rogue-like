@@ -4,7 +4,7 @@ OBJECTS = obj/main.o obj/game_state.o obj/in_game.o obj/map.o
 TARGET = bin/cyjam
 CFLAGS = -Wall -I./include -std=c99
 LDFLAGS = -L./lib
-LDLIBS = -lm -lisland -lfov -lncursesw
+LDLIBS = -lm -lfov -lncursesw
 
 all: CFLAGS += -O3
 all: $(TARGET)
