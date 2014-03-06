@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ncursesw/ncurses.h>
-#include <island.h>
 
 #include "constants.h"
 #include "in_game.h"
@@ -17,8 +16,6 @@ typedef struct PLAYER {
 	unsigned short y;
 } player_t;
 
-static const int I_SIZE = 513;
-static int ** imap;
 static bool ** wmap;
 static bool w_mov = FALSE;
 static bool uK, dK, lK, rK; 
@@ -34,87 +31,46 @@ void render(int, int);
 void drawGui(int, int);
 void setPlayerStart();
 void initObjects();
+void drawNeon(int, int);
+void drawBar(int, int);
 
 void initInGameState( gs_t * gs) {
-	int			 n, i, j;
-	float **		fmap;
+	int i, j;
 
 	gs->name = IN_GAME;
 	gs->input = &input;
 	gs->update = &update;
 	gs->render = &render;
 
-	n = I_SIZE;
-
-	srand(time(NULL));
-
-	fmap = ( float ** ) malloc ( sizeof ( float * ) * n);
-	for ( i = 0; i < n; ++i ) {
-		fmap[ i ] = ( float * ) calloc ( n, sizeof ( float ) );
+    map = ( map_cell_t ** ) malloc ( sizeof ( map_cell_t * ) * MAX_MAP_SIZE);
+	for ( i = 0; i < MAX_MAP_SIZE; ++i ) {
+		map[ i ] = ( map_cell_t * ) calloc ( MAX_MAP_SIZE , sizeof ( map_cell_t ) );
 	}
 
-	imap = ( int ** ) malloc ( sizeof ( int * ) * n);
-	for ( i = 0; i < n; ++i ) {
-		imap[ i ] = ( int * ) calloc ( n, sizeof ( int ) );
-	}
-
-	wmap = ( bool ** ) malloc ( sizeof ( bool * ) * n);
-	for ( i = 0; i < n; ++i ) {
-		wmap[ i ] = ( bool * ) calloc ( n, sizeof ( bool ) );
-		for(j = 0; j < n; ++j){
+    wmap = ( bool ** ) malloc ( sizeof ( bool * ) * MAX_MAP_SIZE);
+	for ( i = 0; i < MAX_MAP_SIZE; ++i ) {
+		wmap[ i ] = ( bool * ) calloc ( MAX_MAP_SIZE, sizeof ( bool ) );
+		for(j = 0; j < MAX_MAP_SIZE; ++j){
 			wmap[i][j] = rand() % 2;
 		}
-	}
-
-	ds ( &fmap, n );
-	island ( &imap, n );
-	normInt ( &imap, n );
-	norm ( &fmap, n );
-	mult ( &fmap, &imap, n );
-	smooth( &imap, n );
-	normInt ( &imap, n );
-
-	for ( i = 0; i < n; ++i ) {
-		free(fmap[ i ]);
-	}
-	free(fmap);
-
-	setPlayerStart();
-	uK = dK = lK = rK = FALSE;
-
-    /*map = ( map_cell_t ** ) malloc ( sizeof ( map_cell_t * ) * 32);
-	for ( i = 0; i < 32; ++i ) {
-		map[ i ] = ( map_cell_t * ) calloc ( 32 , sizeof ( map_cell_t ) );
 	}
 
     initObjects();
 
     errcode_t rc = readMapData("map_file.map", &map, &mW, &mH);
-
-    fprintf(stderr, "\t%s: readMapData() returned %d\n", __FILE__, rc);
-    fprintf(stderr, "\t%s: Map size is (%d, %d).\n", __FILE__, mW, mH);
+    if(rc != NO_ERROR){
+        fprintf(stderr, "\t%s: readMapData() returned %d\n", __FILE__, rc);
+        exit(rc);
+    }
 
     game_obj_t * objsP = objs;
     rc = readMapObjects("map_file.map", &objsP, &nO);
-    fprintf(stderr, "\t%s: readMapObjects() returned %d\n", __FILE__, rc);
-    fprintf(stderr, "\t%s: Number of objects is %d.\n", __FILE__, nO);
-
-    for(i = 0; i < nO; i++){
-        fprintf(stderr, "\t%s: Object %d\n", __FILE__, i);
-        fprintf(stderr, "\t\t Type %d\n", (int)objs[i].type);
-        fprintf(stderr, "\t\t x: %d -- y: %d -- eX: %d -- eY: %d -- sX: %d -- sY: %d\n", objs[i].x, objs[i].x, objs[i].eX, objs[i].eY, objs[i].sX, objs[i].sY);
-        fprintf(stderr, "\t\t iD: %d -- dId %d\n", objs[i].id, objs[i].dId);
-        fprintf(stderr, "\t\t name: %s\n", objs[i].name);
-        fprintf(stderr, "\t\t target: %s\n", objs[i].target);
-        fprintf(stderr, "\t\t dialog: %s\n", objs[i].dialog);
-        fprintf(stderr, "\t\t unlocked: %d\n", objs[i].unlocked);
-        fprintf(stderr, "\n");
+    if(rc != NO_ERROR){
+        fprintf(stderr, "\t%s: readMapObjects() returned %d\n", __FILE__, rc);
+        exit(rc);
     }
 
-    for ( i = 0; i < 32; ++i ) {
-		free(map[ i ]);
-	}
-	free(map);*/
+    setPlayerStart();
 }
 
 void input(){
@@ -132,23 +88,32 @@ void input(){
 }
 
 gsname_t update(){
+    int iX, iY;
+
+    iX = player.x;
+    iY = player.y;
+
 	if(uK){
-		if(terrainType( imap[player.x][player.y - 1] ) != DEEP_WATER && terrainType( imap[player.x][player.y - 1] ) != MOUNTAIN) player.y -= 1;
+        iY = iY - 1 < 0 ? mH - 1 : iY - 1;
+		if((map[iY][iX].f > WINDOW_WALL && map[iY][iX].f <= WATER) || map[iY][iX].f == SECRET_WALL) player.y = iY;
 		uK = FALSE;
 	}
 
 	if(dK){
-		if(terrainType( imap[player.x][player.y + 1]) != DEEP_WATER && terrainType( imap[player.x][player.y + 1]) != MOUNTAIN ) player.y += 1;
+        iY = (iY + 1) % mH;
+		if((map[iY][iX].f > WINDOW_WALL && map[iY][iX].f <= WATER) || map[iY][iX].f == SECRET_WALL) player.y = iY;
 		dK = FALSE;
 	}
 
 	if(lK){
-		if(terrainType( imap[player.x - 1][player.y]) != DEEP_WATER && terrainType( imap[player.x - 1][player.y]) != MOUNTAIN) player.x -= 1;
+        iX = iX - 1 < 0 ? mW - 1 : iX - 1;
+		if((map[iY][iX].f > WINDOW_WALL && map[iY][iX].f <= WATER) || map[iY][iX].f == SECRET_WALL) player.x = iX;
 		lK = FALSE;
 	}
 
 	if(rK){
-		if(terrainType( imap[player.x + 1][player.y]) != DEEP_WATER && terrainType( imap[player.x + 1][player.y]) != MOUNTAIN) player.x += 1;
+        iX = (iX + 1) % mW;
+		if((map[iY][iX].f > WINDOW_WALL && map[iY][iX].f <= WATER) || map[iY][iX].f == SECRET_WALL) player.x = iX;
 		rK = FALSE;
 	}
 
@@ -179,47 +144,57 @@ void render(int w, int h){
 			di = i - 27 + player.x - ioff;
 			dj = j - 1 + player.y - joff;
 
-			if( di < 0 || di >= I_SIZE){
+			if( di < 0 || di >= mW || dj < 0 || dj >= mH ){
 				printw(" ");
 			}else{
-				switch(terrainType( imap[di][dj] )){
-					case DEEP_WATER:
+				switch(map[dj][di].f){
+					case WATER:
 						attron(COLOR_PAIR(DW_COLOR));
 						if(w_mov)
-							wmap[di][dj] = !wmap[di][dj];
-						if(wmap[di][dj])
+							wmap[dj][di] = !wmap[dj][di];
+						if(wmap[dj][di])
 							printw("\u2248");
 						else
 							printw("~");
 						break;
-					case SHALLOW_WATER:
-						attron(COLOR_PAIR(SW_COLOR));
-						if(w_mov)
-							wmap[di][dj] = !wmap[di][dj];
-						if(wmap[di][dj])
-							printw("\u2248");
-						else
-							printw("~");
+
+                    case VOID:
+                        attron(COLOR_PAIR(MN_COLOR));
+						printw(" ");
 						break;
-					case SAND:
+
+                    case EMPTY_FLOOR:
+                        attron(COLOR_PAIR(MN_COLOR));
+						printw(" ");
+						break;
+
+					case RUG:
 						attron(COLOR_PAIR(SN_COLOR));
-						printw(".");
+						printw("\u2592");
 						break;
-					case GRASS:
-						attron(COLOR_PAIR(GR_COLOR));
-						printw("n");
+
+					case WINDOW_WALL:
+						attron(COLOR_PAIR(SW_COLOR));
+						printw("\u2591");
 						break;
-					case FOREST:
-						attron(COLOR_PAIR(FR_COLOR));
-						printw("\u2660");
+
+					case CLEAR_WALL:
+						attron(COLOR_PAIR(SW_COLOR));
+						printw("\u2588");
 						break;
-					case HILL:
-						attron(COLOR_PAIR(HL_COLOR));
-						printw("\u2302");
-						break;
-					case MOUNTAIN:
+
+                    case SECRET_WALL:
+					case SOLID_WALL:
 						attron(COLOR_PAIR(MN_COLOR));
-						printw("\u25B2");
+						printw("\u2588");
+						break;
+
+					case NEON_WALL:
+						drawNeon(dj, di);
+						break;
+
+                    case BAR:
+						drawBar(dj, di);
 						break;
 				}
 			}
@@ -232,6 +207,128 @@ void render(int w, int h){
 	printw(/*"\u263A"*/ "@");
 
 	drawGui(w, h);
+}
+
+void drawNeon(int i, int j){
+    bool n, s, e, w;
+
+    attron(COLOR_PAIR(FR_COLOR));
+
+    n = map[i                         ][j - 1 < 0 ? mH - 1 : j - 1].f == NEON_WALL;
+    s = map[i                         ][(j + 1) % mH              ].f == NEON_WALL;
+    e = map[i - 1 < 0 ? mW - 1 : i - 1][j                         ].f == NEON_WALL;
+    w = map[(i + 1) % mW              ][j                         ].f == NEON_WALL;
+
+    if((n && s && e) && (!w)){
+        printw("\u2560");
+        return;
+    }
+
+    if((n || s) && (!e && !w)){
+        printw("\u2550");
+        return;
+    }
+
+    if((e || w) && (!n && !s)){
+        printw("\u2551");
+        return;
+    }
+
+    if((e && n) && (!s && !w)){
+        printw("\u255D");
+        return;
+    }
+
+    if((w && n) && (!s && !e)){
+        printw("\u2557");
+        return;
+    }
+
+    if((e && s) && (!n && !w)){
+        printw("\u255A");
+        return;
+    }
+
+    if((w && s) && (!n && !e)){
+        printw("\u2554");
+        return;
+    }
+
+    if((s && e && w) && (!n)){
+        printw("\u2560");
+        return;
+    }
+
+    if((n && w && e) && (!s)){
+        printw("\u2563");
+        return;
+    }
+
+    if(n && s && e && w){
+        printw("\u256C");
+        return;
+    }
+}
+
+void drawBar(int i, int j){
+    bool n, s, e, w;
+
+    attron(COLOR_PAIR(SN_COLOR));
+
+    n = map[i                         ][j - 1 < 0 ? mH - 1 : j - 1].f == BAR;
+    s = map[i                         ][(j + 1) % mH              ].f == BAR;
+    e = map[i - 1 < 0 ? mW - 1 : i - 1][j                         ].f == BAR;
+    w = map[(i + 1) % mW              ][j                         ].f == BAR;
+
+    if((n && s && e) && (!w)){
+        printw("\u2560");
+        return;
+    }
+
+    if((n || s) && (!e && !w)){
+        printw("\u2550");
+        return;
+    }
+
+    if((e || w) && (!n && !s)){
+        printw("\u2551");
+        return;
+    }
+
+    if((e && n) && (!s && !w)){
+        printw("\u255D");
+        return;
+    }
+
+    if((w && n) && (!s && !e)){
+        printw("\u2557");
+        return;
+    }
+
+    if((e && s) && (!n && !w)){
+        printw("\u255A");
+        return;
+    }
+
+    if((w && s) && (!n && !e)){
+        printw("\u2554");
+        return;
+    }
+
+    if((s && e && w) && (!n)){
+        printw("\u2560");
+        return;
+    }
+
+    if((n && w && e) && (!s)){
+        printw("\u2563");
+        return;
+    }
+
+    if(n && s && e && w){
+        printw("\u256C");
+        return;
+    }
 }
 
 void drawGui(int w, int h){
@@ -283,19 +380,15 @@ void drawGui(int w, int h){
 }
 
 void setPlayerStart(){
-	int x, y;
-	bool posFound = false;
+	int i;
 
-	while(!posFound){
-		x = (I_SIZE / 4) + (rand() % (I_SIZE / 2));
-		y = (I_SIZE / 4) + (rand() % (I_SIZE / 2));
-
-		if(terrainType(imap[x][y]) == GRASS){
-			player.x = x;
-			player.y = y;
-			posFound = true;
-		}
-	}
+    for(i = 0; i < nO; i++){
+        if(objs[i].type == PLAYER_START){
+            player.y = objs[i].sX;
+            player.x = objs[i].sY;
+            break;
+        }
+    }
 }
 
 void initObjects(){

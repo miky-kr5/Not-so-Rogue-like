@@ -9,7 +9,7 @@
 void initStateArray(gs_t ** s){
 	int i;
 
-	for(i = 0; i < NUM_STATES; i++){
-		initInGameState(&((*s)[i]));
-	}
+	/*for(i = 0; i < NUM_STATES; i++){*/
+		initInGameState(&((*s)[2]));
+	/*}*/
 }

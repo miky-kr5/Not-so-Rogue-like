@@ -243,7 +243,7 @@ void set_colors(void){
 			init_pair(SW_COLOR, COLOR_CYAN, COLOR_BLACK);
 			init_pair(SN_COLOR, COLOR_YELLOW, COLOR_BLACK);
 			init_pair(GR_COLOR, COLOR_GREEN, COLOR_BLACK);
-			init_pair(FR_COLOR, COLOR_GREEN, COLOR_BLACK);
+			init_pair(FR_COLOR, COLOR_RED, COLOR_BLACK);
 			init_pair(HL_COLOR, COLOR_WHITE, COLOR_BLACK);
 			init_pair(MN_COLOR, COLOR_WHITE, COLOR_BLACK);
 		}
