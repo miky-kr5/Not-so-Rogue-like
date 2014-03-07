@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <ncursesw/ncurses.h>
+#include <fov.h>
 
 #include "constants.h"
 #include "in_game.h"
@@ -16,6 +17,7 @@ typedef struct PLAYER {
 	unsigned short y;
 } player_t;
 
+static bool **vis;
 static bool ** wmap;
 static bool w_mov = FALSE;
 static bool uK, dK, lK, rK; 
@@ -24,6 +26,7 @@ static player_t player;
 static map_cell_t ** map;
 game_obj_t objs[MAX_OBJECTS];
 static int mW, mH, nO;
+fov_settings_type fov_settings;
 
 void input();
 gsname_t update();
@@ -33,6 +36,8 @@ void setPlayerStart();
 void initObjects();
 void drawNeon(int, int);
 void drawBar(int, int);
+void apply(void *, int, int, int, int, void *);
+bool opaque(void *, int, int);
 
 void initInGameState( gs_t * gs) {
 	int i, j;
@@ -55,6 +60,14 @@ void initInGameState( gs_t * gs) {
 		}
 	}
 
+    vis = ( bool ** ) malloc ( sizeof ( bool * ) * MAX_MAP_SIZE);
+	for ( i = 0; i < MAX_MAP_SIZE; ++i ) {
+		vis[ i ] = ( bool * ) calloc ( MAX_MAP_SIZE, sizeof ( bool ) );
+		for(j = 0; j < MAX_MAP_SIZE; ++j){
+			vis[i][j] = TRUE;
+		}
+	}
+
     initObjects();
 
     errcode_t rc = readMapData("map_file.map", &map, &mW, &mH);
@@ -71,6 +84,10 @@ void initInGameState( gs_t * gs) {
     }
 
     setPlayerStart();
+
+    fov_settings_init(&fov_settings);
+    fov_settings_set_opacity_test_function(&fov_settings, opaque);
+    fov_settings_set_apply_lighting_function(&fov_settings, apply);
 }
 
 void input(){
@@ -137,6 +154,8 @@ void render(int w, int h){
 	ioff = (w - 28) / 2;
 	joff = (h - 2) / 2;
 
+    fov_circle(&fov_settings, &map, NULL, player.x, player.y, (MAX_MAP_SIZE / 2) - 1);
+
 	for(i = 27; i < w - 1; i++){
 		for(j = 1; j < h - 1; j++){
 			move(j, i);
@@ -147,56 +166,61 @@ void render(int w, int h){
 			if( di < 0 || di >= mW || dj < 0 || dj >= mH ){
 				printw(" ");
 			}else{
-				switch(map[dj][di].f){
-					case WATER:
-						attron(COLOR_PAIR(DW_COLOR));
-						if(w_mov)
-							wmap[dj][di] = !wmap[dj][di];
-						if(wmap[dj][di])
-							printw("\u2248");
-						else
-							printw("~");
-						break;
+                if(vis[dj][di]){
+                    switch(map[dj][di].f){
+                        case WATER:
+                            attron(COLOR_PAIR(DW_COLOR));
+                            if(w_mov)
+                                wmap[dj][di] = !wmap[dj][di];
+                            if(wmap[dj][di])
+                                printw("\u2248");
+                            else
+                                printw("~");
+                            break;
 
-                    case VOID:
-                        attron(COLOR_PAIR(MN_COLOR));
-						printw(" ");
-						break;
+                        case VOID:
+                            attron(COLOR_PAIR(MN_COLOR));
+                            printw(" ");
+                            break;
 
-                    case EMPTY_FLOOR:
-                        attron(COLOR_PAIR(MN_COLOR));
-						printw(" ");
-						break;
+                        case EMPTY_FLOOR:
+                            attron(COLOR_PAIR(MN_COLOR));
+                            printw(" ");
+                            break;
 
-					case RUG:
-						attron(COLOR_PAIR(SN_COLOR));
-						printw("\u2592");
-						break;
+                        case RUG:
+                            attron(COLOR_PAIR(SN_COLOR));
+                            printw("\u2592");
+                            break;
 
-					case WINDOW_WALL:
-						attron(COLOR_PAIR(SW_COLOR));
-						printw("\u2591");
-						break;
+                        case WINDOW_WALL:
+                            attron(COLOR_PAIR(SW_COLOR));
+                            printw("\u2591");
+                            break;
 
-					case CLEAR_WALL:
-						attron(COLOR_PAIR(SW_COLOR));
-						printw("\u2588");
-						break;
+                        case CLEAR_WALL:
+                            attron(COLOR_PAIR(SW_COLOR));
+                            printw("\u2588");
+                            break;
 
-                    case SECRET_WALL:
-					case SOLID_WALL:
-						attron(COLOR_PAIR(MN_COLOR));
-						printw("\u2588");
-						break;
+                        case SECRET_WALL:
+                        case SOLID_WALL:
+                            attron(COLOR_PAIR(MN_COLOR));
+                            printw("\u2588");
+                            break;
 
-					case NEON_WALL:
-						drawNeon(dj, di);
-						break;
+                        case NEON_WALL:
+                            drawNeon(dj, di);
+                            break;
 
-                    case BAR:
-						drawBar(dj, di);
-						break;
-				}
+                        case BAR:
+                            drawBar(dj, di);
+                            break;
+                    }
+                }else{
+                    attron(COLOR_PAIR(MN_COLOR));
+                    printw(" ");
+                }
 			}
 		}
 	}
@@ -207,6 +231,12 @@ void render(int w, int h){
 	printw(/*"\u263A"*/ "@");
 
 	drawGui(w, h);
+
+    for ( i = 0; i < MAX_MAP_SIZE; ++i ) {
+		for(j = 0; j < MAX_MAP_SIZE; ++j){
+			vis[i][j] = FALSE;
+		}
+	}
 }
 
 void drawNeon(int i, int j){
@@ -408,5 +438,22 @@ void initObjects(){
         objs[i].target[0] = '\0';
         objs[i].dialog[0] = '\0';
         objs[i].unlocked = 0;
+    }
+}
+
+void apply(void *map, int x, int y, int dx, int dy, void *src){
+    if(x < 0 || x >= MAX_MAP_SIZE) return;
+    if(y < 0 || y >= MAX_MAP_SIZE) return;
+	vis[y][x] = TRUE;
+}
+
+bool opaque(void *m, int x, int y){
+    if(x < 0 || x >= MAX_MAP_SIZE) return FALSE;
+    if(y < 0 || y >= MAX_MAP_SIZE) return FALSE;
+
+	if(map[y][x].f == SOLID_WALL || map[y][x].f == SECRET_WALL){
+        return TRUE;
+    }else{
+        return FALSE;
     }
 }
