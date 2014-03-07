@@ -18,6 +18,7 @@ typedef struct PLAYER {
 } player_t;
 
 static bool **vis;
+static bool **seen;
 static bool ** wmap;
 static bool w_mov = FALSE;
 static bool uK, dK, lK, rK; 
@@ -34,8 +35,7 @@ void render(int, int);
 void drawGui(int, int);
 void setPlayerStart();
 void initObjects();
-void drawNeon(int, int);
-void drawBar(int, int);
+void drawNeon(int, int, floor_t);
 void apply(void *, int, int, int, int, void *);
 bool opaque(void *, int, int);
 
@@ -61,10 +61,13 @@ void initInGameState( gs_t * gs) {
 	}
 
     vis = ( bool ** ) malloc ( sizeof ( bool * ) * MAX_MAP_SIZE);
+    seen = ( bool ** ) malloc ( sizeof ( bool * ) * MAX_MAP_SIZE);
 	for ( i = 0; i < MAX_MAP_SIZE; ++i ) {
 		vis[ i ] = ( bool * ) calloc ( MAX_MAP_SIZE, sizeof ( bool ) );
+        seen[ i ] = ( bool * ) calloc ( MAX_MAP_SIZE, sizeof ( bool ) );
 		for(j = 0; j < MAX_MAP_SIZE; ++j){
 			vis[i][j] = TRUE;
+            seen[i][j] = FALSE;
 		}
 	}
 
@@ -166,7 +169,7 @@ void render(int w, int h){
 			if( di < 0 || di >= mW || dj < 0 || dj >= mH ){
 				printw(" ");
 			}else{
-                if(vis[dj][di]){
+                if(vis[dj][di] || seen[dj][di]){
                     switch(map[dj][di].f){
                         case WATER:
                             attron(COLOR_PAIR(DW_COLOR));
@@ -179,42 +182,48 @@ void render(int w, int h){
                             break;
 
                         case VOID:
-                            attron(COLOR_PAIR(MN_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(MN_COLOR));
                             printw(" ");
                             break;
 
                         case EMPTY_FLOOR:
-                            attron(COLOR_PAIR(MN_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(MN_COLOR));
                             printw(" ");
                             break;
 
                         case RUG:
-                            attron(COLOR_PAIR(SN_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(SN_COLOR));
                             printw("\u2592");
                             break;
 
                         case WINDOW_WALL:
-                            attron(COLOR_PAIR(SW_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(SW_COLOR));
                             printw("\u2591");
                             break;
 
                         case CLEAR_WALL:
-                            attron(COLOR_PAIR(SW_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(SW_COLOR));
                             printw("\u2588");
                             break;
 
                         case SECRET_WALL:
                         case SOLID_WALL:
-                            attron(COLOR_PAIR(MN_COLOR));
+                            if(!vis[dj][di]) attron(COLOR_PAIR(DW_COLOR));
+                            else attron(COLOR_PAIR(MN_COLOR));
                             printw("\u2588");
                             break;
 
                         case NEON_WALL:
-                            drawNeon(dj, di);
+                            drawNeon(dj, di, NEON_WALL);
                             break;
 
                         case BAR:
-                            drawBar(dj, di);
+                            drawNeon(dj, di, BAR);
                             break;
                     }
                 }else{
@@ -239,76 +248,28 @@ void render(int w, int h){
 	}
 }
 
-void drawNeon(int i, int j){
+void drawNeon(int i, int j, floor_t floor){
+    int r;
     bool n, s, e, w;
 
-    attron(COLOR_PAIR(FR_COLOR));
-
-    n = map[i                         ][j - 1 < 0 ? mH - 1 : j - 1].f == NEON_WALL;
-    s = map[i                         ][(j + 1) % mH              ].f == NEON_WALL;
-    e = map[i - 1 < 0 ? mW - 1 : i - 1][j                         ].f == NEON_WALL;
-    w = map[(i + 1) % mW              ][j                         ].f == NEON_WALL;
-
-    if((n && s && e) && (!w)){
-        printw("\u2560");
-        return;
+    if(floor == NEON_WALL){
+        if(!vis[i][j]) attron(COLOR_PAIR(DW_COLOR));
+        else{
+            r = rand() % 1000;
+            if(r < 998)
+                attron(COLOR_PAIR(FR_COLOR));
+            else
+                attron(COLOR_PAIR(MN_COLOR));
+        }
+    }else if(floor == BAR){
+        if(!vis[i][j]) attron(COLOR_PAIR(DW_COLOR));
+        else attron(COLOR_PAIR(SN_COLOR));
     }
 
-    if((n || s) && (!e && !w)){
-        printw("\u2550");
-        return;
-    }
-
-    if((e || w) && (!n && !s)){
-        printw("\u2551");
-        return;
-    }
-
-    if((e && n) && (!s && !w)){
-        printw("\u255D");
-        return;
-    }
-
-    if((w && n) && (!s && !e)){
-        printw("\u2557");
-        return;
-    }
-
-    if((e && s) && (!n && !w)){
-        printw("\u255A");
-        return;
-    }
-
-    if((w && s) && (!n && !e)){
-        printw("\u2554");
-        return;
-    }
-
-    if((s && e && w) && (!n)){
-        printw("\u2560");
-        return;
-    }
-
-    if((n && w && e) && (!s)){
-        printw("\u2563");
-        return;
-    }
-
-    if(n && s && e && w){
-        printw("\u256C");
-        return;
-    }
-}
-
-void drawBar(int i, int j){
-    bool n, s, e, w;
-
-    attron(COLOR_PAIR(SN_COLOR));
-
-    n = map[i                         ][j - 1 < 0 ? mH - 1 : j - 1].f == BAR;
-    s = map[i                         ][(j + 1) % mH              ].f == BAR;
-    e = map[i - 1 < 0 ? mW - 1 : i - 1][j                         ].f == BAR;
-    w = map[(i + 1) % mW              ][j                         ].f == BAR;
+    n = map[i                         ][j - 1 < 0 ? mH - 1 : j - 1].f == floor;
+    s = map[i                         ][(j + 1) % mH              ].f == floor;
+    e = map[i - 1 < 0 ? mW - 1 : i - 1][j                         ].f == floor;
+    w = map[(i + 1) % mW              ][j                         ].f == floor;
 
     if((n && s && e) && (!w)){
         printw("\u2560");
@@ -444,7 +405,9 @@ void initObjects(){
 void apply(void *map, int x, int y, int dx, int dy, void *src){
     if(x < 0 || x >= MAX_MAP_SIZE) return;
     if(y < 0 || y >= MAX_MAP_SIZE) return;
+
 	vis[y][x] = TRUE;
+    seen[y][x] = TRUE;
 }
 
 bool opaque(void *m, int x, int y){
