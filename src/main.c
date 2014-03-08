@@ -20,7 +20,6 @@ void leave(void);
 void manage_signal(int signal);
 int start_ncurses(void);
 void set_colors(void);
-void clear_screen(void);
 void on_resize(int);
 
 static int w = 0, h = 0;
@@ -85,7 +84,7 @@ int main() {
 	set_colors();
 
 	/* Create the state data structures. */
-	c_state = 2;
+	c_state = MENU;
 	states = (gs_t *)malloc(sizeof(gs_t) * NUM_STATES);
 	initStateArray(&states);
 
@@ -110,7 +109,9 @@ int main() {
 
 		if(c_state == -1) finished = TRUE;
 
-		states[c_state].render(w, h);
+        if(c_state >= INTRO && c_state <= GAME_OVER){
+		    states[c_state].render(w, h);
+        }
 
 		fps++;
 
@@ -240,17 +241,5 @@ void set_colors(void){
 	}else{
 		fprintf(stderr, "\t%s: Colors not supported.\n", __FILE__);
 		exit(EXIT_FAILURE);
-	}
-}
-
-void clear_screen(void){
-	int i, j;
-	move(0,0);
-	attron(COLOR_PAIR(BSC_COLOR));
-	for(i = 0; i < w; i++){
-		for(j = 0; j < h; j++){
-			move(j, i);
-			printw(" ");
-		}
 	}
 }

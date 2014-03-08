@@ -126,7 +126,13 @@ gsname_t update(){
 
 	if(rK) nX = (iX + 1) % mW;
 
-    if(esc) return IN_GAME;
+    if(esc){
+        /* Reset the game and go to the main menu. */
+        esc = FALSE;
+        initObjects();
+	    loadMap("maps/start.map");
+        return MENU;
+    }
 
 	/* Find if the player is standing on an exit, then load the next map. */
 	for(i = 0; i < nO; i++){

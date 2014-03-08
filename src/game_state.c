@@ -4,12 +4,10 @@
  */
 
 #include "game_state.h"
+#include "main_menu.h"
 #include "in_game.h"
 
 void initStateArray(gs_t ** s){
-	int i;
-
-	/*for(i = 0; i < NUM_STATES; i++){*/
-		initInGameState(&((*s)[2]));
-	/*}*/
+    initMMState(&((*s)[MENU]));
+    initInGameState(&((*s)[IN_GAME]));
 }
