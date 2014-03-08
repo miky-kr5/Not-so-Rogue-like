@@ -335,11 +335,15 @@ void render(int w, int h){
 
 							if(objs[k].type == DOOR){
 								printw("\u25D9");
-							}else if(objs[k].type == KEY){
-								printw("k");
-							}else if(objs[k].type == PERSON){
-								printw("\u263A");
-							}
+							}else{
+                                if(vis[dj][di]){
+                                    if(objs[k].type == KEY){
+                                        printw("k");
+                                    }else if(objs[k].type == PERSON){
+                                        printw("\u263A");
+                                    }
+                                }
+                            }
 						}
 					}
 
