@@ -28,22 +28,16 @@ static bool resize = FALSE;
 
 int main() {
 	bool finished = FALSE;
-#if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
-	char	  *	home_dir = getenv("APPDATA");
-#elif defined(__linux__) || defined(__GNUC__)
-	char	  *	home_dir = getenv("HOME");
-#else
-#error "Unrecognized system."
-#endif
-	FILE	  *	f; /* To avoid a warning. */
-	clock_t		then, now, delta;
-	unsigned int   fps = 0, pfps = 0;
-	char	  *	data_dir;
-	char	  *	log_file;
-	time_t		 raw_date;
-	struct tm *	current_date;
-	gs_t	  *	states;
-	int			c_state;
+	char         *    home_dir = getenv("HOME");
+	FILE         *    f; /* To avoid a warning. */
+	clock_t           then, now, delta;
+	unsigned int      fps = 0, pfps = 0;
+	char         *    data_dir;
+	char         *    log_file;
+	time_t            raw_date;
+	struct tm    *    current_date;
+	gs_t         *    states;
+	int               c_state;
 
 	atexit(leave);
 	signal(SIGINT, manage_signal);
@@ -70,15 +64,11 @@ int main() {
 		fprintf(stderr, "%s", asctime(current_date));
 
 		/* Try to create the data directory with permissions 775. */
-		if(mkdir(data_dir, S_IRWXU | S_IWGRP | S_IRGRP| S_IROTH | S_IXOTH) == 0){
-			/* The data directory was sucessfully created. */
-		}else{
+		if(mkdir(data_dir, S_IRWXU | S_IWGRP | S_IRGRP| S_IROTH | S_IXOTH) != 0){
 			if(errno != EEXIST){
 				/* The directory does not exists and could not be created. */
 				perror("\t" __FILE__);
 				fprintf(stderr, "\tdata_dir is: %s\n", data_dir);
-			}else{
-				/* The directory already exits. */
 			}
 		}
 	}else{

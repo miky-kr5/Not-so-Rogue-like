@@ -6,13 +6,7 @@
 #ifndef STATE_CONSTS_H
 #define STATE_CONSTS_H
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__MINGW32__)
-#define F_SEP "\\"
-#elif defined(__linux__) || defined(__GNUC__)
 #define F_SEP "/"
-#else
-#error "Unrecognized system."
-#endif
 
 enum COLORS {
 	BAR_COLOR = 1,
