@@ -28,7 +28,7 @@ static bool **vis;
 static bool **seen;
 static bool ** wmap;
 static bool w_mov = FALSE;
-static bool uK, dK, lK, rK; 
+static bool uK, dK, lK, rK, esc; 
 static clock_t then, msgThen;
 static player_t player;
 static map_cell_t ** map;
@@ -55,6 +55,8 @@ bool canMoveTo(int, int);
 
 void initInGameState( gs_t * gs) {
 	int i, j;
+
+    uK = dK = lK = rK = esc = FALSE;
 
 	gs->name = IN_GAME;
 	gs->input = &input;
@@ -86,7 +88,7 @@ void initInGameState( gs_t * gs) {
 	}
 
 	initObjects();
-	loadMap("map_file.map");
+	loadMap("maps/start.map");
 
 	fov_settings_init(&fov_settings);
 	fov_settings_set_opacity_test_function(&fov_settings, opaque);
@@ -103,6 +105,7 @@ void input(){
 		if(key == KEY_DOWN) dK = TRUE;
 		if(key == KEY_LEFT) lK = TRUE;
 		if(key == KEY_RIGHT) rK = TRUE;
+        if(key == 27) esc = TRUE;
 	}
 }
 
@@ -123,6 +126,8 @@ gsname_t update(){
 
 	if(rK) nX = (iX + 1) % mW;
 
+    if(esc) return IN_GAME;
+
 	/* Find if the player is standing on an exit, then load the next map. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == EXIT){
@@ -135,7 +140,7 @@ gsname_t update(){
 		}
 	}
 
-	/* TODO: use keys.*/
+    /* If the player is standing on a key, pick it up. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == KEY){
 			if(objs[i].x == iY && objs[i].y == iX){
@@ -150,7 +155,7 @@ gsname_t update(){
 		}
 	}
 
-	/* Listen to a person. */
+	/* If the player bumps into a person, listen to what they have to say. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == PERSON){
 			if(objs[i].x == nY && objs[i].y == nX){
@@ -172,6 +177,7 @@ gsname_t update(){
 		}
 	}
 
+    /* If the player bumps into a door, open it if the key is available. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == DOOR){
 			if(objs[i].x == nY && objs[i].y == nX){
@@ -200,6 +206,7 @@ gsname_t update(){
 		}
 	}
 
+    /* Clear the message buffer after a timeout. */
 	if(newMsg){
 		msgNow = clock();
 		delta = msgNow - msgThen;
@@ -336,14 +343,14 @@ void render(int w, int h){
 							if(objs[k].type == DOOR){
 								printw("\u25D9");
 							}else{
-                                if(vis[dj][di]){
-                                    if(objs[k].type == KEY){
-                                        printw("k");
-                                    }else if(objs[k].type == PERSON){
-                                        printw("\u263A");
-                                    }
-                                }
-                            }
+								if(vis[dj][di]){
+									if(objs[k].type == KEY){
+										printw("k");
+									}else if(objs[k].type == PERSON){
+										printw("\u263A");
+									}
+								}
+							}
 						}
 					}
 
