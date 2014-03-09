@@ -18,5 +18,6 @@ typedef struct GAME_STATE {
 } gs_t;
 
 extern void initStateArray(gs_t **);
+void clear_screen(int, int);
 
 #endif

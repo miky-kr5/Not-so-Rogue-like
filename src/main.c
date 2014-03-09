@@ -27,16 +27,16 @@ static bool resize = FALSE;
 
 int main() {
 	bool finished = FALSE;
-	char         *    home_dir = getenv("HOME");
-	FILE         *    f; /* To avoid a warning. */
-	clock_t           then, now, delta;
-	unsigned int      fps = 0, pfps = 0;
-	char         *    data_dir;
-	char         *    log_file;
-	time_t            raw_date;
-	struct tm    *    current_date;
-	gs_t         *    states;
-	int               c_state;
+	char		 *	home_dir = getenv("HOME");
+	FILE		 *	f; /* To avoid a warning. */
+	clock_t		   then, now, delta;
+	unsigned int	  fps = 0, pfps = 0;
+	char		 *	data_dir;
+	char		 *	log_file;
+	time_t			raw_date;
+	struct tm	*	current_date;
+	gs_t		 *	states;
+	int			   c_state;
 
 	atexit(leave);
 	signal(SIGINT, manage_signal);
@@ -84,7 +84,7 @@ int main() {
 	set_colors();
 
 	/* Create the state data structures. */
-	c_state = MENU;
+	c_state = INTRO;
 	states = (gs_t *)malloc(sizeof(gs_t) * NUM_STATES);
 	initStateArray(&states);
 
@@ -109,23 +109,25 @@ int main() {
 
 		if(c_state == -1) finished = TRUE;
 
-        if(c_state >= INTRO && c_state <= GAME_OVER){
-		    states[c_state].render(w, h);
-        }
-
-		fps++;
-
-		now = clock();
-		delta = now - then;
-		if((int)delta / (int)CLOCKS_PER_SEC == 1){
-			then = now;
-			pfps = fps;
-			fps = 0;
+		if(c_state >= INTRO && c_state <= GAME_OVER){
+			states[c_state].render(w, h);
 		}
 
-		move(1, 1);
-		attron(COLOR_PAIR(BSC_COLOR));
-		printw("FPS: %u", pfps);
+		if(DEBUG){
+			fps++;
+
+			now = clock();
+			delta = now - then;
+			if((int)delta / (int)CLOCKS_PER_SEC == 1){
+				then = now;
+				pfps = fps;
+				fps = 0;
+			}
+
+			move(1, 1);
+			attron(COLOR_PAIR(BSC_COLOR));
+			printw("FPS: %u", pfps);
+		}
 
 		refresh();
 	}while(!finished);
@@ -219,7 +221,6 @@ void set_colors(void){
 	ret_code = start_color();
 	if(ret_code == OK){
 		if(has_colors() == TRUE){
-			init_color(COLOR_MAGENTA, 0, 0, 500);
 
 			init_pair(BAR_COLOR, COLOR_WHITE, COLOR_RED);	 /* The color for the top and bottom bars. */
 			init_pair(BSC_COLOR, COLOR_WHITE, COLOR_BLACK);   /* Basic text color. */
@@ -237,6 +238,9 @@ void set_colors(void){
 			init_pair(FR_COLOR, COLOR_RED, COLOR_BLACK);
 			init_pair(HL_COLOR, COLOR_WHITE, COLOR_BLACK);
 			init_pair(MN_COLOR, COLOR_WHITE, COLOR_BLACK);
+
+			init_pair(VOID_COLOR, COLOR_BLACK, COLOR_BLACK); /* Pure black. */
+			init_pair(IND_COLOR, COLOR_MAGENTA, COLOR_BLACK); /* Intro shadow. */
 		}
 	}else{
 		fprintf(stderr, "\t%s: Colors not supported.\n", __FILE__);

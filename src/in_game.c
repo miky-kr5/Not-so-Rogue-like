@@ -56,7 +56,7 @@ bool canMoveTo(int, int);
 void initInGameState( gs_t * gs) {
 	int i, j;
 
-    uK = dK = lK = rK = esc = FALSE;
+	uK = dK = lK = rK = esc = FALSE;
 
 	gs->name = IN_GAME;
 	gs->input = &input;
@@ -105,7 +105,7 @@ void input(){
 		if(key == KEY_DOWN) dK = TRUE;
 		if(key == KEY_LEFT) lK = TRUE;
 		if(key == KEY_RIGHT) rK = TRUE;
-        if(key == 27) esc = TRUE;
+		if(key == 27) esc = TRUE;
 	}
 }
 
@@ -126,13 +126,13 @@ gsname_t update(){
 
 	if(rK) nX = (iX + 1) % mW;
 
-    if(esc){
-        /* Reset the game and go to the main menu. */
-        esc = FALSE;
-        initObjects();
-	    loadMap("maps/start.map");
-        return MENU;
-    }
+	if(esc){
+		/* Reset the game and go to the main menu. */
+		esc = FALSE;
+		initObjects();
+		loadMap("maps/start.map");
+		return MENU;
+	}
 
 	/* Find if the player is standing on an exit, then load the next map. */
 	for(i = 0; i < nO; i++){
@@ -146,7 +146,7 @@ gsname_t update(){
 		}
 	}
 
-    /* If the player is standing on a key, pick it up. */
+	/* If the player is standing on a key, pick it up. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == KEY){
 			if(objs[i].x == iY && objs[i].y == iX){
@@ -183,7 +183,7 @@ gsname_t update(){
 		}
 	}
 
-    /* If the player bumps into a door, open it if the key is available. */
+	/* If the player bumps into a door, open it if the key is available. */
 	for(i = 0; i < nO; i++){
 		if(objs[i].type == DOOR){
 			if(objs[i].x == nY && objs[i].y == nX){
@@ -212,7 +212,7 @@ gsname_t update(){
 		}
 	}
 
-    /* Clear the message buffer after a timeout. */
+	/* Clear the message buffer after a timeout. */
 	if(newMsg){
 		msgNow = clock();
 		delta = msgNow - msgThen;
@@ -264,7 +264,7 @@ void render(int w, int h){
 		w_mov = TRUE;
 	}
 
-	pi = (((w - 1) - 1) / 2) + 1;
+	pi = (((w - 2) - 1) / 2) + 1;
 	pj = (h - 3) / 2 + 1;
 
 	ioff = (w - 28 - 27) / 2;
