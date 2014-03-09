@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <ncursesw/ncurses.h>
 #include <fov.h>
 
@@ -140,8 +141,14 @@ gsname_t update(){
 			if(objs[i].x == iY && objs[i].y == iX){
 				player.x = objs[i].eX;
 				player.y = objs[i].eY;
-				loadMap(objs[i].target);
-				return IN_GAME;
+                if(strcmp(objs[i].target, "END") != 0){
+				    loadMap(objs[i].target);
+				    return IN_GAME;
+                }else{
+                    initObjects();
+		            loadMap("maps/start.map");
+                    return GAME_OVER;
+                }
 			}
 		}
 	}
@@ -519,7 +526,7 @@ void setPlayerStart(){
 }
 
 void initObjects(){
-	int i;
+	int i, j;
 
 	for(i = 0; i < MAX_OBJECTS; ++i){
 		objs[i].type = NONE;
@@ -531,9 +538,11 @@ void initObjects(){
 		objs[i].sY = 0;
 		objs[i].id = 0;
 		objs[i].dId = 0;
-		objs[i].name[0] = '\0';
-		objs[i].target[0] = '\0';
-		objs[i].dialog[0] = '\0';
+		for(j = 0; j < MAX_STR; j++){
+            objs[i].name[j] = '\0';
+            objs[i].target[j] = '\0';
+            objs[i].dialog[j] = '\0';
+        }
 		objs[i].unlocked = 0;
 	}
 }

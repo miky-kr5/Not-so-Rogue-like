@@ -10,14 +10,14 @@
 #include "constants.h"
 #include "main_menu.h"
 
-static char *	title	= "TITLE PENDING";
-static char *	subtitle = "A game for the Cyberpunk Jam 2014";
-static char *	opt1	 = "New game";
-static char *	opt2	 = "Replay intro";
-static char *	opt3	 = "Quit";
-static char *	creds	= "Designed and programmed by Miky";
-static char *	info	 = "Press enter to select an option. Scroll with the arrow keys.";
-static char *	info2	= "Press escape while in game to return to the main menu.";
+static const char * title = "TITLE PENDING";
+static const char * subtitle = "A game for the Cyberpunk Jam 2014";
+static const char *	opt1	 = "New game";
+static const char *	opt2	 = "Replay intro";
+static const char *	opt3	 = "Quit";
+static const char *	creds	= "Designed and programmed by Miky";
+static const char *	info	 = "Press enter to select an option. Scroll with the arrow keys.";
+static const char *	info2	= "Press escape while in game to return to the main menu.";
 
 static int	   selOpt = 0;
 static bool	  uK, dK, esc, enter;

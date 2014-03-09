@@ -10,11 +10,13 @@
 #include "intro.h"
 #include "main_menu.h"
 #include "in_game.h"
+#include "game_over.h"
 
 void initStateArray(gs_t ** s){
 	initIntroState(&((*s)[INTRO]));
 	initMMState(&((*s)[MENU]));
 	initInGameState(&((*s)[IN_GAME]));
+	initGOState(&((*s)[GAME_OVER]));
 }
 
 void clear_screen(int w, int h){

@@ -6,7 +6,7 @@
 #ifndef STATE_CONSTS_H
 #define STATE_CONSTS_H
 
-static const int DEBUG = 1;
+static const int DEBUG = 0;
 #define F_SEP "/"
 
 enum COLORS {

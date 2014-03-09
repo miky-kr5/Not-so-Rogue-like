@@ -26,8 +26,6 @@ errcode_t readMapData(const char * file, map_cell_t *** map, int * w, int * h){
 			int rc, i, j;
 			char *end;
 
-			fprintf(stderr, "\t%s.readMapData() : found a map.\n", __FILE__);
-
 			rc = getline(&buffer, &n, f);
 			if(rc == -1){
 				free(buffer);

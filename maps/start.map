@@ -39,7 +39,7 @@ player = 27 15
 %exit = X Y MAP_NAME MAP_X MAP_Y
 exit = 8 25 maps/start.map 0 0
 exit = 9 25 maps/start.map 0 0
-exit = 10 24 maps/start.map 0 0
+exit = 10 24 END 0 0
 exit = 10 25 maps/start.map 0 0
 [DOORS]
 %door = X Y ID UNLOCKED
