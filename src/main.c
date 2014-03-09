@@ -18,25 +18,25 @@
 
 void leave(void);
 void manage_signal(int signal);
-int start_ncurses(void);
+int  start_ncurses(void);
 void set_colors(void);
 void on_resize(int);
 
-static int w = 0, h = 0;
+static int  w = 0, h = 0;
 static bool resize = FALSE;
 
 int main() {
-	bool finished = FALSE;
-	char		 *	home_dir = getenv("HOME");
-	FILE		 *	f; /* To avoid a warning. */
-	clock_t		   then, now, delta;
-	unsigned int	  fps = 0, pfps = 0;
-	char		 *	data_dir;
-	char		 *	log_file;
-	time_t			raw_date;
-	struct tm	*	current_date;
-	gs_t		 *	states;
-	int			   c_state;
+	bool            finished = FALSE;
+	char         *  home_dir = getenv("HOME");
+	FILE         *  f; /* To avoid a warning. */
+	clock_t         then, now, delta;
+	unsigned int    fps = 0, pfps = 0;
+	char         *  data_dir;
+	char         *  log_file;
+	time_t          raw_date;
+	struct tm    *  current_date;
+	gs_t         *  states;
+	int             c_state;
 
 	atexit(leave);
 	signal(SIGINT, manage_signal);

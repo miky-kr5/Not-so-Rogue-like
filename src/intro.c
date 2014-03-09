@@ -16,9 +16,9 @@ void inInput();
 gsname_t inUpdate();
 void inRender(int, int);
 
-static bool anyKey;
-static clock_t then = 0, nThen = 0;
-static int mRows = 0, mH = 0;
+static bool     anyKey;
+static clock_t  then = 0, nThen = 0;
+static int      mRows = 0, mH = 0;
 
 void initIntroState(gs_t * gs){
 	gs->name = INTRO;

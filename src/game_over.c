@@ -10,11 +10,11 @@
 #include "constants.h"
 #include "game_over.h"
 
-static const char * title = "TITLE PENDING";
-static const char * subtitle = "A game for the Cyberpunk Jam 2014";
-static const char *	aWinnerIsYou = "You have completed the scenario!";
-static const char *	thanks = "Thank you for playing.";
-static const char *	goInfo	 = "Press enter to return to the main menu.";
+static const char * title        = "TITLE PENDING";
+static const char * subtitle     = "A game for the Cyberpunk Jam 2014";
+static const char * aWinnerIsYou = "You have completed the scenario!";
+static const char * thanks       = "Thank you for playing.";
+static const char * goInfo       = "Press enter to return to the main menu.";
 
 static bool	   enter;
 

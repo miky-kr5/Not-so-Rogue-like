@@ -30,7 +30,7 @@ CELL_SIZE    = 10
 MAP_SIZE     = (64, 64)
 SCREEN_SIZE  = ((MAP_SIZE[1] * CELL_SIZE) + 1, (MAP_SIZE[0] * CELL_SIZE) + 1)
 SCREEN_FLAGS = pygame.HWSURFACE | pygame.DOUBLEBUF
-TITLE        = "Cyberpunk Jam 2014 - Level editor"
+TITLE        = "CyJam :: "
 FPS          = 60
 
 # Cell types
@@ -278,6 +278,7 @@ def main():
     obj_str = ""
     fl_str = ""
     mouse_pos = (0, 0)
+    mouse_cell = (0, 0)
     mouse_r_click = False
     mouse_l_click = False
 
@@ -298,7 +299,7 @@ def main():
             # Set title bar.
             obj_str = get_object_type_name(curr_obj)
             fl_str = get_floor_type_name(curr_fl)
-            title = TITLE + " :: FPS: " + str(int(fps))
+            title = TITLE + str(mouse_cell) + " :: FPS: " + str(int(fps))
             title += " :: " + obj_str + " :: " + fl_str
             pygame.display.set_caption(title)
 
@@ -315,6 +316,9 @@ def main():
                         mouse_l_click = True
 
                 if event.type == pygame.MOUSEMOTION:
+                    i = mouse_pos[1] // CELL_SIZE
+                    j = mouse_pos[0] // CELL_SIZE
+                    mouse_cell = (i, j)
                     if mouse_r_click:
                         mouse_pos = event.pos
 

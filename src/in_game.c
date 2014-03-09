@@ -25,34 +25,34 @@ typedef struct PLAYER {
 	unsigned short y;
 } player_t;
 
-static bool **vis;
-static bool **seen;
-static bool ** wmap;
-static bool w_mov = FALSE;
-static bool uK, dK, lK, rK, esc; 
-static clock_t then, msgThen;
-static player_t player;
-static map_cell_t ** map;
-static game_obj_t objs[MAX_OBJECTS];
-static int mW, mH, nO;
-static fov_settings_type fov_settings;
-static int keys[MAX_KEYS];
-static int freeKey;
-static char msg[128];
-static bool newMsg = FALSE;
+static bool       **      vis;
+static bool       **      seen;
+static bool       **      wmap;
+static bool               w_mov = FALSE;
+static bool               uK, dK, lK, rK, esc; 
+static clock_t            then, msgThen;
+static player_t           player;
+static map_cell_t **      map;
+static game_obj_t         objs[MAX_OBJECTS];
+static int                mW, mH, nO;
+static fov_settings_type  fov_settings;
+static int                keys[MAX_KEYS];
+static int                freeKey;
+static char               msg[128];
+static bool               newMsg = FALSE;
 
-void input();
+void     input();
 gsname_t update();
-void render(int, int);
-void drawGui(int, int);
-void setPlayerStart();
-void initObjects();
-void initKeys();
-void drawNeon(int, int, floor_t);
-void apply(void *, int, int, int, int, void *);
-bool opaque(void *, int, int);
-void loadMap(const char *);
-bool canMoveTo(int, int);
+void     render(int, int);
+void     drawGui(int, int);
+void     setPlayerStart();
+void     initObjects();
+void     initKeys();
+void     drawNeon(int, int, floor_t);
+void     apply(void *, int, int, int, int, void *);
+bool     opaque(void *, int, int);
+void     loadMap(const char *);
+bool     canMoveTo(int, int);
 
 void initInGameState( gs_t * gs) {
 	int i, j;
@@ -167,6 +167,7 @@ gsname_t update(){
 				}
 				newMsg = TRUE;
 				msgThen = clock();
+                freeKey++;
 			}
 		}
 	}
@@ -418,28 +419,33 @@ void drawNeon(int i, int j, floor_t floor){
 		else attron(COLOR_PAIR(SN_COLOR));
 	}
 
-	n = map[i						 ][j - 1 < 0 ? mH - 1 : j - 1].f == floor;
-	s = map[i						 ][(j + 1) % mH			  ].f == floor;
-	e = map[i - 1 < 0 ? mW - 1 : i - 1][j						 ].f == floor;
-	w = map[(i + 1) % mW			  ][j						 ].f == floor;
+	w = map[i						 ][j - 1 < 0 ? mH - 1 : j - 1].f == floor;
+	e = map[i						 ][(j + 1) % mH			  ].f == floor;
+	s = map[i - 1 < 0 ? mW - 1 : i - 1][j						 ].f == floor;
+	n = map[(i + 1) % mW			  ][j						 ].f == floor;
 
 	if((n && s && e) && (!w)){
 		printw("\u2560");
 		return;
 	}
 
-	if((n || s) && (!e && !w)){
-		printw("\u2550");
+	if((n && s && w) && (!e)){
+		printw("\u2563");
 		return;
 	}
 
-	if((e || w) && (!n && !s)){
+	if((n || s) && (!e && !w)){
 		printw("\u2551");
 		return;
 	}
 
+	if((e || w) && (!n && !s)){
+		printw("\u2550");
+		return;
+	}
+
 	if((e && n) && (!s && !w)){
-		printw("\u255D");
+		printw("\u2554");
 		return;
 	}
 
@@ -454,17 +460,17 @@ void drawNeon(int i, int j, floor_t floor){
 	}
 
 	if((w && s) && (!n && !e)){
-		printw("\u2554");
+		printw("\u255D");
 		return;
 	}
 
 	if((s && e && w) && (!n)){
-		printw("\u2560");
+		printw("\u2569");
 		return;
 	}
 
 	if((n && w && e) && (!s)){
-		printw("\u2563");
+		printw("\u2566");
 		return;
 	}
 
