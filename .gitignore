@@ -15,5 +15,6 @@ obj/
 *.app
 bin/
 
-# Emacs backups
+# Assorted files
 *~
+Cyberpunk-Jam
