@@ -10,7 +10,7 @@
 #include "constants.h"
 #include "main_menu.h"
 
-static const char * title    = "TITLE PENDING";
+static const char * title    = "NOT SO ROGUE-LIKE";
 static const char * subtitle = "A game for the Cyberpunk Jam 2014";
 static const char * opt1     = "New game";
 static const char * opt2     = "Replay intro";
