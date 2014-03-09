@@ -141,14 +141,14 @@ gsname_t update(){
 			if(objs[i].x == iY && objs[i].y == iX){
 				player.x = objs[i].eX;
 				player.y = objs[i].eY;
-                if(strcmp(objs[i].target, "END") != 0){
-				    loadMap(objs[i].target);
-				    return IN_GAME;
-                }else{
-                    initObjects();
-		            loadMap("maps/start.map");
-                    return GAME_OVER;
-                }
+				if(strcmp(objs[i].target, "END") != 0){
+					loadMap(objs[i].target);
+					return IN_GAME;
+				}else{
+					initObjects();
+					loadMap("maps/start.map");
+					return GAME_OVER;
+				}
 			}
 		}
 	}
@@ -539,10 +539,10 @@ void initObjects(){
 		objs[i].id = 0;
 		objs[i].dId = 0;
 		for(j = 0; j < MAX_STR; j++){
-            objs[i].name[j] = '\0';
-            objs[i].target[j] = '\0';
-            objs[i].dialog[j] = '\0';
-        }
+			objs[i].name[j] = '\0';
+			objs[i].target[j] = '\0';
+			objs[i].dialog[j] = '\0';
+		}
 		objs[i].unlocked = 0;
 	}
 }

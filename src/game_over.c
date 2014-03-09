@@ -12,8 +12,8 @@
 
 static const char * title = "TITLE PENDING";
 static const char * subtitle = "A game for the Cyberpunk Jam 2014";
-static const char *    aWinnerIsYou = "You have completed the scenario!";
-static const char *    thanks = "Thank you for playing.";
+static const char *	aWinnerIsYou = "You have completed the scenario!";
+static const char *	thanks = "Thank you for playing.";
 static const char *	goInfo	 = "Press enter to return to the main menu.";
 
 static bool	   enter;
@@ -45,7 +45,7 @@ gsname_t goUpdate(){
 		return MENU;
 	}
 
-    return GAME_OVER;
+	return GAME_OVER;
 }
 
 void goRender(int w, int h){
