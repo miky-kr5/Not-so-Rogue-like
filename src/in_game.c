@@ -159,6 +159,9 @@ gsname_t update(){
 			if(objs[i].x == iY && objs[i].y == iX){
 				keys[freeKey] = objs[i].id;
 				objs[i].type = NONE;
+				for(j = 0; j < 128; j++){
+					msg[j] = '\0';
+				}
 				for(j = 0; keyMsg[j] && j < 128; j++){
 					msg[j] = keyMsg[j];
 				}
@@ -174,6 +177,10 @@ gsname_t update(){
 			if(objs[i].x == nY && objs[i].y == nX){
 				for(k = 0; k < nO; k++)
 					if(objs[k].type == DIALOG && objs[k].id == objs[i].dId) break;
+
+				for(j = 0; j < 128; j++){
+					msg[j] = '\0';
+				}
 
 				for(j = 0; objs[i].name[j] && j < 128; j++)
 					msg[j] = objs[i].name[j];
@@ -200,6 +207,10 @@ gsname_t update(){
 							objs[i].unlocked = 1;
 							break;
 						}
+					}
+
+					for(j = 0; j < 128; j++){
+						msg[j] = '\0';
 					}
 
 					if(objs[i].unlocked){
