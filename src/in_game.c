@@ -231,6 +231,11 @@ gsname_t update(){
 		}
 	}
 
+	/* If the player walks through a secret wall then clear it. */
+	if (map[iY][iX].f == SECRET_WALL) {
+	  map[iY][iX].f = EMPTY_FLOOR;
+	}
+
 	/* Clear the message buffer after a timeout. */
 	if(newMsg){
 		msgNow = clock();
